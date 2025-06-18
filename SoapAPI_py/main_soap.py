@@ -2,9 +2,9 @@ from spyne import Application, rpc, ServiceBase, Unicode, Integer, Array
 from spyne.model.complex import ComplexModel
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
 import uuid
-
 
 # -----------------------------
 # MODELOS
@@ -15,19 +15,16 @@ class Usuario(ComplexModel):
     nome = Unicode
     idade = Integer
 
-
 class Musica(ComplexModel):
     id = Unicode
     nome = Unicode
     artista = Unicode
-
 
 class Playlist(ComplexModel):
     id = Unicode
     nome = Unicode
     usuario_id = Unicode
     musicas = Array(Unicode)
-
 
 # -----------------------------
 # DADOS EM MEMÓRIA
@@ -36,7 +33,6 @@ class Playlist(ComplexModel):
 usuarios = {}
 musicas = {}
 playlists = {}
-
 
 # -----------------------------
 # SERVIÇO SOAP
@@ -102,19 +98,22 @@ class MusicService(ServiceBase):
     def listarPlaylistsPorMusica(ctx, musica_id):
         return [p for p in playlists.values() if musica_id in p.musicas]
 
-
 # -----------------------------
 # APLICAÇÃO SOAP
 # -----------------------------
 
-application = Application(
+soap_app = Application(
     services=[MusicService],
     tns='musica.soap.api',
     in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11()
 )
 
-wsgi_app = WsgiApplication(application)
+# Mapeia para /soap
+wsgi_app = WsgiApplication(soap_app)
+app = DispatcherMiddleware(None, {
+    '/soap': wsgi_app
+})
 
 if __name__ == '__main__':
-    run_simple('0.0.0.0', 8000, wsgi_app)
+    run_simple('0.0.0.0', 8005, app)

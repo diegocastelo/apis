@@ -1,3 +1,4 @@
 spyne
 werkzeug
 lxml
+zeep
