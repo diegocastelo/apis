@@ -1,3 +1,1 @@
-graphene
-flask
-flask-graphql
+strawberry

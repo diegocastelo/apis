@@ -19,6 +19,7 @@ playlists = [
     {"id": 2, "nome": "Rock", "usuario_id": 2, "musicas": [2]}
 ]
 
+
 class MusicService(music_service_pb2_grpc.MusicServiceServicer):
     def ListUsuarios(self, request, context):
         return music_service_pb2.UsuariosResponse(usuarios=usuarios)
@@ -47,6 +48,7 @@ class MusicService(music_service_pb2_grpc.MusicServiceServicer):
         ]
         return music_service_pb2.PlaylistsResponse(playlists=result)
 
+
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     music_service_pb2_grpc.add_MusicServiceServicer_to_server(MusicService(), server)
@@ -54,6 +56,7 @@ def serve():
     print("Servidor gRPC rodando na porta 50051...")
     server.start()
     server.wait_for_termination()
+
 
 if __name__ == '__main__':
     serve()
